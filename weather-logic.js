@@ -1,5 +1,4 @@
 const search = document.getElementById("location");
-const description = document.querySelector("weather-description");
 const city = document.querySelector("weather-city");
 const date = document.querySelector("weather-date");
 const temp = document.querySelector("temperature");
@@ -23,22 +22,24 @@ async function getLocationKey(location) {
     );
     const locationResults = await locationName.json();
     const cityName = locationResults.LocalizedName;
-    getHourlyForecast(locationKey, cityName);
+
+    getCurrentForecast(locationKey, cityName);
   } catch {
     console.log("Location could not be found");
   }
 }
 //uses the location key and gives us the forecast data for that specific location
-async function getHourlyForecast(key, city) {
+async function getCurrentForecast(key, city) {
   try {
-    const hourlyForecastData = await fetch(
-      "http://dataservice.accuweather.com/forecasts/v1/hourly/1hour/" +
+    const currentForecastData = await fetch(
+      "http://dataservice.accuweather.com/currentconditions/v1/" +
         key +
         "?apikey=vaPdHFsC2z5ulxbJkJXxR79TSiptn3DB",
       { mode: "cors" }
     );
-    const hourlyForecast = await hourlyForecastData.json();
-    const weatherData = processWeatherData(hourlyForecast, city);
+    const currentForecast = await currentForecastData.json();
+    const weatherData = await processCurrentWeatherData(currentForecast, city);
+    displayData(weatherData);
   } catch {
     console.log("Could not find matching forecast with given key");
   }
@@ -48,13 +49,43 @@ function submitWeatherLocation() {
   const location = search.value;
   getLocationKey(location);
 }
-function processWeatherData(weatherData, city) {
-  const hourlyDes = weatherData[0].IconPhrase;
-  const hourlyTemp = weatherData[0].Temperature.Value;
-  const hourlyUnit = weatherData[0].Temperature.Unit;
-  const hourlyCity = city;
+//processes weather data and creates data object and returns value for current conditions
+function processCurrentWeatherData(weatherData, city) {
+  const currentConditons = weatherData[0].WeatherText;
+  const currentTemp = weatherData[0].Temperature.Imperial.Value;
+  const units = weatherData[0].Temperature.Imperial.Unit;
+  const currentTimeData = weatherData[0].EpochTime;
+  const convertedTime = currentTimeData * 1000;
+  const myData = {
+    conditions: weatherData[0].WeatherText,
+    city: city,
+    time: convertEpochTime(convertedTime),
+    temeperature: weatherData[0].Temperature.Imperial.Value,
+    units: weatherData[0].Temperature.Imperial.Unit,
+  };
+  return myData;
+}
+//converts epoch time from API call and returns human-readable time format in current timezone
+function convertEpochTime(time) {
+  let dateObject = new Date(time);
+  let timeStamp = dateObject.toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+  const ye = new Intl.DateTimeFormat("en", { year: "numeric" }).format(
+    dateObject
+  );
+  const mo = new Intl.DateTimeFormat("en", { month: "numeric" }).format(
+    dateObject
+  );
+  const da = new Intl.DateTimeFormat("en", { day: "2-digit" }).format(
+    dateObject
+  );
 
-  console.log(hourlyDes);
-  console.log(hourlyTemp + "" + hourlyUnit);
-  console.log(hourlyCity);
+  let fullDateTime = `${mo}/${da}/${ye} ${timeStamp}`;
+  return fullDateTime;
+}
+async function displayData(data) {
+  const string = data.conditions;
+  console.log(string);
 }
