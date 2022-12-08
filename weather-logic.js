@@ -1,8 +1,4 @@
 const search = document.getElementById("location");
-const city = document.querySelector("weather-city");
-const date = document.querySelector("weather-date");
-const temp = document.querySelector("temperature");
-const icon = document.querySelector("weather-icon");
 //uses search value to fetch a location key from API to send to the getForecast function
 async function getLocationKey(location) {
   try {
@@ -21,8 +17,9 @@ async function getLocationKey(location) {
       { mode: "cors" }
     );
     const locationResults = await locationName.json();
-    const cityName = locationResults.LocalizedName;
-
+    const locationString = locationResults.LocalizedName;
+    const countryName = locationResults.Country.LocalizedName;
+    const cityName = locationString + ", " + countryName;
     getCurrentForecast(locationKey, cityName);
   } catch {
     console.log("Location could not be found");
@@ -51,16 +48,13 @@ function submitWeatherLocation() {
 }
 //processes weather data and creates data object and returns value for current conditions
 function processCurrentWeatherData(weatherData, city) {
-  const currentConditons = weatherData[0].WeatherText;
-  const currentTemp = weatherData[0].Temperature.Imperial.Value;
-  const units = weatherData[0].Temperature.Imperial.Unit;
   const currentTimeData = weatherData[0].EpochTime;
   const convertedTime = currentTimeData * 1000;
   const myData = {
     conditions: weatherData[0].WeatherText,
     city: city,
     time: convertEpochTime(convertedTime),
-    temeperature: weatherData[0].Temperature.Imperial.Value,
+    temperature: weatherData[0].Temperature.Imperial.Value,
     units: weatherData[0].Temperature.Imperial.Unit,
   };
   return myData;
@@ -86,6 +80,17 @@ function convertEpochTime(time) {
   return fullDateTime;
 }
 async function displayData(data) {
-  const string = data.conditions;
-  console.log(string);
+  const description = document.querySelector(".weather-description");
+  const city = document.querySelector(".weather-city");
+  const date = document.querySelector(".weather-date");
+  const temp = document.querySelector(".temperature");
+  const icon = document.querySelector(".weather-icon");
+  try {
+    description.textContent = data.conditions;
+    city.textContent = data.city;
+    date.textContent = data.time;
+    temp.textContent = data.temperature + " " + data.units + "°";
+  } catch {
+    console.log("Error");
+  }
 }
