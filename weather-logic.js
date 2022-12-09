@@ -3,7 +3,7 @@ const search = document.getElementById("location");
 async function getLocationKey(location) {
   try {
     const locationKeyData = await fetch(
-      "http://dataservice.accuweather.com/locations/v1/search/?apikey=vaPdHFsC2z5ulxbJkJXxR79TSiptn3DB&q=" +
+      "https://dataservice.accuweather.com/locations/v1/search/?apikey=vaPdHFsC2z5ulxbJkJXxR79TSiptn3DB&q=" +
         location,
       { mode: "cors" }
     );
@@ -11,7 +11,7 @@ async function getLocationKey(location) {
     const locationKey = keyResults[0].Key;
 
     const locationName = await fetch(
-      "http://dataservice.accuweather.com/locations/v1/" +
+      "https://dataservice.accuweather.com/locations/v1/" +
         locationKey +
         "?apikey=vaPdHFsC2z5ulxbJkJXxR79TSiptn3DB",
       { mode: "cors" }
@@ -29,7 +29,7 @@ async function getLocationKey(location) {
 async function getCurrentForecast(key, city) {
   try {
     const currentForecastData = await fetch(
-      "http://dataservice.accuweather.com/currentconditions/v1/" +
+      "https://dataservice.accuweather.com/currentconditions/v1/" +
         key +
         "?apikey=vaPdHFsC2z5ulxbJkJXxR79TSiptn3DB",
       { mode: "cors" }
@@ -75,10 +75,10 @@ function convertEpochTime(time) {
   const da = new Intl.DateTimeFormat("en", { day: "2-digit" }).format(
     dateObject
   );
-
   let fullDateTime = `${mo}/${da}/${ye} ${timeStamp}`;
   return fullDateTime;
 }
+//grabs weatherData and appends information to DOM elements
 async function displayData(data) {
   const description = document.querySelector(".weather-description");
   const city = document.querySelector(".weather-city");
